@@ -3,3 +3,6 @@ cv2
 numpy
 mtplotlib
 dlib
+keras
+os
+tensorflow
