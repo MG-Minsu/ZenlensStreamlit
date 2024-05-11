@@ -11,7 +11,7 @@ NORMALIZATION_FACTOR = 255.0
 
 # Paths and model setup
 folder_path = st.file_uploader("Select a folder:", type=["jpeg", "png", "img"])
-model_path = "model_optimal_v3.h5"
+model_path = "fer.h5"
 detector = dlib.get_frontal_face_detector()
 model = load_model(model_path)
 emotion_labels = ['angry', 'disgust', 'afraid', 'happy', 'neutral', 'sad', 'surprise']
