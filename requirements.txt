@@ -2,5 +2,5 @@ streamlit
 opencv-python-headless
 tensorflow
 numpy
-dlib
+dlib==19.22.0
 matplotlib
