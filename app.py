@@ -10,7 +10,7 @@ IMAGE_SIZE = 48
 NORMALIZATION_FACTOR = 255.0
 
 # Paths and model setup
-folder_path = st.file_uploader("Select a folder:", type=["jpeg", "png", "img"])
+folder_path = st.sidebar.file_uploader("Select a folder:", type=["jpeg", "png", "img"])
 model_path = "fer.h5"
 detector = dlib.get_frontal_face_detector()
 model = load_model("fer.h5")
@@ -47,12 +47,12 @@ def classify_emotions(probabilities: np.ndarray) -> float:
     stress_percentage = (stressed_prob / total) * 100
     return stress_percentage
 
-def analyze_image(image_path: str) -> float:
-    """Analyze an image and return the average stress level"""
+def analyze_image(image_path: str) -> dict:
+    """Analyze an image and return the stress analysis results"""
     image = cv2.imread(image_path)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     faces = detector(gray)
-    stress_levels = []
+    stress_results = {}
 
     for face in faces:
         x, y, w, h = face.left(), face.top(), face.width(), face.height()
@@ -60,32 +60,27 @@ def analyze_image(image_path: str) -> float:
         processed_image = preprocess_image(cropped_face)
         probabilities = predict_emotion(processed_image)
         stress_level = classify_emotions(probabilities)
-        stress_levels.append(stress_level)
+        stress_results[f"Face {len(stress_results)}"] = stress_level
 
-    if not stress_levels:  # No faces detected
-        return None
-    return np.mean(stress_levels)
+    return stress_results
 
 def process_folder(folder_path: str) -> None:
     """Process all images in a folder and display stress analysis results"""
-    stress_results = {}
-    for filename in os.listdir(folder_path):
-        if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
-            image_path = os.path.join(folder_path, filename)
-            average_stress = analyze_image(image_path)
-            stress_results[filename] = average_stress
-
-    st.write("Stress Analysis Results:")
-    for filename, stress in stress_results.items():
-        if stress is None:
-            st.write(f"{filename}: No faces detected.")
-        else:
-            st.write(f"{filename}: Average Stress Level = {stress:.2f}%")
+    if folder_path is not None:
+        try:
+            for filename in os.listdir(folder_path):
+                if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                    image_path = os.path.join(folder_path, filename)
+                    stress_results = analyze_image(image_path)
+                    st.write("Stress Analysis Results:")
+                    for key, stress in stress_results.items():
+                        st.write(f"{key}: Average Stress Level = {stress:.2f}%")
+        except Exception as e:
+            st.write(f"An error occurred while processing the folder:\n\n```\n{str(e)}\n```")
 
 def main() -> None:
     """Main entry point"""
-    if folder_path is not None:
-        try:
-            process_folder(folder_path)
-        except Exception as e:
-            st.write(f"An error occurred while processing the folder:\n\n```\n{str(e)}\n```")
+    process_folder(folder_path)
+
+if __name__ == "__main__":
+    main()
