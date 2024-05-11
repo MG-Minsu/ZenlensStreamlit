@@ -2,9 +2,12 @@ import os
 import cv2
 import dlib
 import numpy as np
-import matplotlib.pyplot as plt
 from keras.models import load_model
 import streamlit as st
+
+# Constants
+IMAGE_SIZE = 48
+NORMALIZATION_FACTOR = 255.0
 
 # Paths and model setup
 folder_path = st.file_uploader("Select a folder:", type=["folder"])
@@ -15,18 +18,20 @@ emotion_labels = ['angry', 'disgust', 'afraid', 'happy', 'neutral', 'sad', 'surp
 stressed_emotions = ['sad', 'afraid', 'disgust', 'angry']
 non_stressed_emotions = ['happy', 'neutral', 'surprise']
 
-def preprocess_image(gray):
-    resized = cv2.resize(gray, (48, 48), interpolation=cv2.INTER_AREA)
-    normalized = resized / 255.0
+def preprocess_image(gray: np.ndarray) -> np.ndarray:
+    """Preprocess an image for emotion detection"""
+    resized = cv2.resize(gray, (IMAGE_SIZE, IMAGE_SIZE), interpolation=cv2.INTER_AREA)
+    normalized = resized / NORMALIZATION_FACTOR
     processed_image = np.expand_dims(normalized, axis=-1)
     processed_image = np.expand_dims(processed_image, axis=0)
     return processed_image
 
-def predict_emotion(processed_image):
-    probabilities = model.predict(processed_image)
-    return probabilities
+def predict_emotion(processed_image: np.ndarray) -> np.ndarray:
+    """Predict emotions from a preprocessed image"""
+    return model.predict(processed_image)
 
-def classify_emotions(probabilities):
+def classify_emotions(probabilities: np.ndarray) -> float:
+    """Classify emotions into stressed and non-stressed categories"""
     stressed_prob = 0
     non_stressed_prob = 0
 
@@ -42,7 +47,8 @@ def classify_emotions(probabilities):
     stress_percentage = (stressed_prob / total) * 100
     return stress_percentage
 
-def analyze_image(image_path):
+def analyze_image(image_path: str) -> float:
+    """Analyze an image and return the average stress level"""
     image = cv2.imread(image_path)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     faces = detector(gray)
@@ -60,7 +66,8 @@ def analyze_image(image_path):
         return None
     return np.mean(stress_levels)
 
-def main(folder_path):
+def process_folder(folder_path: str) -> None:
+    """Process all images in a folder and display stress analysis results"""
     stress_results = {}
     for filename in os.listdir(folder_path):
         if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
@@ -75,6 +82,10 @@ def main(folder_path):
         else:
             st.write(f"{filename}: Average Stress Level = {stress:.2f}%")
 
-if __name__ == "__main__":
+def main() -> None:
+    """Main entry point"""
     if folder_path is not None:
-        main(folder_path)
+        try:
+            process_folder(folder_path)
+        except Exception as e:
+            st.write(f"Error:
