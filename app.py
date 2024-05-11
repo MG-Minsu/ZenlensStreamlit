@@ -88,4 +88,4 @@ def main() -> None:
         try:
             process_folder(folder_path)
         except Exception as e:
-            st.write(f"Error:
+            st.write(f"An error occurred while processing the folder:\n\n```\n{str(e)}\n```")
