@@ -1,6 +1,6 @@
-streamlit==1.12.0  # Use the latest version or specify the version you have tested with
-opencv-python-headless==4.5.5.64  # Using headless to avoid GUI conflicts in server environments
-tensorflow==2.9.1  # or keras==2.6.0, depending on how your model was built
+streamlit==1.12.0
+opencv-python-headless==4.5.5.64
+tensorflow==2.12.0  # Updated to a compatible version
 numpy==1.21.2
 dlib==19.22.0
 matplotlib==3.4.3  # Optional, remove if not used
